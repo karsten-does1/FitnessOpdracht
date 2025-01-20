@@ -1,4 +1,7 @@
+using FitnessBL.Interfaces;
 using FitnessBL.Services;
+using FitnessDL.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FitnessRest
 {
@@ -8,14 +11,23 @@ namespace FitnessRest
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddDbContext<GymTestContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
             // Add services to the container.
-            builder.Services.AddScoped<MemberService>();
+            builder.Services.AddScoped<IMemberService ,MemberService>();
+            builder.Services.AddScoped<IEquipmentService, EquipmentService>();
+            builder.Services.AddScoped<IProgramService, ProgramService>();
 
 
 
 
-            builder.Services.AddControllers();
 
+            builder.Services.AddControllers()
+           .AddJsonOptions(options =>
+           {
+               options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+           });
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -27,6 +39,7 @@ namespace FitnessRest
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
 
             app.UseHttpsRedirection();
 
